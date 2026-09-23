@@ -1,0 +1,70 @@
+# ---------------------------------------------------------------------------
+# Secrets
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# ---------------------------------------------------------------------------
+# Jupyter
+# ---------------------------------------------------------------------------
+*.ipynb_checkpoints
+profile_default/
+ipython_config.py
+
+# ---------------------------------------------------------------------------
+# Data
+#
+# Nothing here is hand-authored -- every file is either downloaded or produced
+# by a script, so it is regenerated rather than versioned.
+#
+#   data/raw/          RentCast API responses. Their licensing covers derivative
+#                      works and distribution to end users of your application;
+#                      it does not clearly permit republishing their records as
+#                      a public dataset. Keep local. Regenerate:
+#                        python3 scripts/rentcast_pull.py --pull --circle <name>
+#   data/geo/source/   66 MB of Census archives. Regenerate: build_geo.py
+#   data/geo/*.geojson Clipped from the above. Regenerate: build_geo.py
+#   data/processed/    Derived. Regenerate: clean.py then features.py
+#
+# Kept: data/external/ (112 KB of public-domain Census + Zillow research
+# summaries) and the filter log, so the pipeline's decisions stay reviewable.
+# ---------------------------------------------------------------------------
+data/raw/
+data/geo/source/
+data/geo/*.geojson
+data/quota_log.jsonl
+
+data/processed/*
+!data/processed/clean_filter_log.csv
+
+# ---------------------------------------------------------------------------
+# OS / editor
+# ---------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~

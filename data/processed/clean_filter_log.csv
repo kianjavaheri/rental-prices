@@ -1,0 +1,8 @@
+step,rows,note
+expanded from history,12598,
+after collapsing repost churn,12153,max reposts merged: 9
+drop missing listedDate,11513,-640
+drop missing bedrooms,11320,-193
+drop missing propertyType,11304,-16
+"drop price outside $400-$20,000",11304,-0
+drop inconsistent coords for same address,11283,-21
