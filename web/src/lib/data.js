@@ -10,15 +10,15 @@ async function json(name) {
 }
 
 export async function loadEverything() {
-  const [bundle, meta, regionsGeo, countiesGeo, coastGeo, properties] =
+  const [bundle, meta, regionsGeo, countiesGeo, coastGeo, blocks] =
     await Promise.all([
       json('trees.json'), json('meta.json'), json('regions.geojson'),
-      json('counties.geojson'), json('coastline.geojson'), json('properties.json'),
+      json('counties.geojson'), json('coastline.geojson'), json('blocks.json'),
     ]);
   return {
     bundle,
     meta,
-    properties,
+    blocks,
     ctx: prepareContext({ meta, regionsGeo, countiesGeo, coastGeo }),
   };
 }

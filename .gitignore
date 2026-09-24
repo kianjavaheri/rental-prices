@@ -13,8 +13,8 @@ __pycache__/
 *$py.class
 *.so
 .Python
-build/
-dist/
+/build/
+/dist/
 *.egg-info/
 .venv/
 venv/
@@ -69,6 +69,9 @@ data/processed/*
 node_modules/
 web/dist/
 *.local
+
+# Vercel
+.vercel
 
 # ---------------------------------------------------------------------------
 # OS / editor

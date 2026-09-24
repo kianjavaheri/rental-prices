@@ -20,7 +20,7 @@ function Comparables({ comps }) {
         <tbody>
           {comps.map((c) => (
             <tr key={c.id}>
-              <td className="addr">{c.addr.replace(/, CA \d+$/, '')}</td>
+              <td className="addr">{c.addr}</td>
               <td className="num">{c.miles.toFixed(2)} mi</td>
               <td className="num">{c.sqft ? `${c.sqft.toLocaleString()} sqft` : '—'}</td>
               <td className="num strong">{usd(c.price)}</td>
@@ -63,27 +63,27 @@ function Why({ contributions }) {
   );
 }
 
-export default function ResultPanel({ result, property, comps, dateLabel }) {
+export default function ResultPanel({ result, block, comps, dateLabel }) {
   if (!result) {
     return (
       <div className="panel empty">
         <h2>Pick a unit</h2>
         <p>
-          Click any pin on the map, or search an address above. Blue pins are the
-          2,665 studios and one-bedrooms in the dataset; you can also price an
-          address that isn&apos;t in it.
+          Click any pin on the map, or search an address above. Blue pins are
+          street blocks where studios and one-bedrooms have been listed; you can
+          also price an address that isn&apos;t in the data.
         </p>
       </div>
     );
   }
 
-  const years = property
-    ? [...new Set(property.listings.map((l) => l.d.slice(0, 4)))].sort()
+  const years = block
+    ? [...new Set(block.listings.map((l) => l.d.slice(0, 4)))].sort()
     : [];
 
   return (
     <div className="panel">
-      <h2>{property ? property.addr.replace(/, CA \d+$/, '') : 'Entered unit'}</h2>
+      <h2>{block ? block.addr : 'Entered unit'}</h2>
       <p className="muted sub">
         {result.derived.place} · {result.derived.county} County ·
         {' '}{result.derived.distCoast.toFixed(2)} mi from the ocean
@@ -104,21 +104,26 @@ export default function ResultPanel({ result, property, comps, dateLabel }) {
         </p>
       )}
 
-      {property && (
+      {block && (
         <section>
-          <h3>What it actually rented for</h3>
+          <h3>What actually rented here</h3>
           {years.length === 1 ? (
             <p className="muted">
-              This unit appears in the data for <strong>{years[0]} only</strong>
-              {property.listings.length > 1
-                ? ` (${property.listings.length} listings that year).` : '.'}
+              This block appears in the data for <strong>{years[0]} only</strong>
+              {block.listings.length > 1
+                ? ` (${block.listings.length} listings that year).` : '.'}
             </p>
           ) : (
             <p className="muted">Listed in {years.join(', ')}.</p>
           )}
+          {block.units > 1 && (
+            <p className="muted small">
+              {block.units} separate units on this block, grouped to ~100 m.
+            </p>
+          )}
           <table className="history">
             <tbody>
-              {property.listings.map((l, i) => (
+              {block.listings.map((l, i) => (
                 <tr key={i}><td>{l.d}</td><td className="num strong">{usd(l.p)}</td></tr>
               ))}
             </tbody>

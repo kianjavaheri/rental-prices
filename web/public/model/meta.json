@@ -25,6 +25,11 @@
     "minMonths": 1.58,
     "maxMonths": 71.98
   },
+  "counts": {
+    "blocks": 1455,
+    "units": 2665,
+    "listings": 3038
+  },
   "metrics": {
     "mae": 297,
     "mape": 12.9,

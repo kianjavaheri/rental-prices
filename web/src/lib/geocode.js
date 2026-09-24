@@ -1,4 +1,4 @@
-// Address autocomplete. Known properties are matched locally; anything else
+// Address autocomplete. Known street blocks are matched locally; anything else
 // goes to Photon (CORS-enabled, built for type-ahead, no API key).
 
 const BBOX = '-122.40,36.35,-121.35,37.35';   // the study area
@@ -23,12 +23,12 @@ function normalise(text) {
     .join(' ');
 }
 
-/** Match dataset properties on a normalised address, best matches first. */
-export function searchProperties(properties, query, limit = 6) {
+/** Match dataset street blocks on a normalised address, best matches first. */
+export function searchBlocks(blocks, query, limit = 6) {
   const q = normalise(query);
   if (q.length < 2) return [];
   const out = [];
-  for (const p of properties) {
+  for (const p of blocks) {
     if (p._norm === undefined) p._norm = normalise(p.addr);   // memoised
     const idx = p._norm.indexOf(q);
     if (idx === -1) continue;

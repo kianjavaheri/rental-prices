@@ -8,13 +8,14 @@ Writes to web/public/model/:
     regions.geojson   simplified place polygons (place, place_kind, county)
     counties.geojson  county outlines, for points outside every place
     coastline.geojson simplified shoreline, for distance-to-ocean
-    properties.json   every studio/1BR property: location, attributes, rent history
+    blocks.json       street-block groups: coarse location, attributes, rent history
     fixture.json      50 listings with Python predictions, to verify the JS port
 
 Run:  .venv/bin/python scripts/export_web.py
 """
 
 import json
+import re
 from pathlib import Path
 
 import sys
@@ -136,24 +137,47 @@ def main():
     gpd.read_file(ROOT / "data/geo/coastline.geojson")[["geometry"]].to_file(
         OUT / "coastline.geojson", driver="GeoJSON")
 
-    # ---- properties for the map, autocomplete and comparables ----------------
-    props = []
-    for pid, g in t.sort_values("listedDate").groupby("id"):
-        f = g.iloc[-1]
-        props.append({
-            "id": pid,
-            "addr": f.formattedAddress,
-            "lat": round(float(f.latitude), 5),
-            "lon": round(float(f.longitude), 5),
-            "place": f.place,
-            "beds": int(f.bedrooms),
-            "baths": None if pd.isna(f.bathrooms) else float(f.bathrooms),
-            "sqft": None if pd.isna(f.squareFootage) else int(f.squareFootage),
-            "type": f.propertyType,
+    # ---- street blocks for the map, autocomplete and comparables -------------
+    # Coordinates are rounded to 3dp (~100 m) and street numbers dropped, so the
+    # published file does not reconstruct the source listing records. Units that
+    # land on the same rounded point with the same bedroom count are merged.
+    UNIT_WORDS = r"\b(apt|unit|ste|suite|no\.?)\b\s*[\w-]*|#\s*[\w-]*"
+    PURE_NUMBER = re.compile(r"^\d+(?:[/-]\d+)?[a-z]?$", re.I)
+
+    def street_of(addr):
+        head = re.sub(UNIT_WORDS, " ", addr.split(",")[0], flags=re.I)
+        tokens = head.split()
+        # Drop leading purely-numeric tokens ("1129", "1/2", "2-2525", "520A").
+        # Ordinals such as "17th" and "1st" are street NAMES and are kept.
+        while tokens and PURE_NUMBER.match(tokens[0]):
+            tokens.pop(0)
+        return " ".join(tokens).strip(" -,") or "Unnamed St"
+
+    t = t.copy()
+    t["_lat3"] = t.latitude.round(3)
+    t["_lon3"] = t.longitude.round(3)
+    t["_street"] = t.formattedAddress.map(street_of)
+
+    blocks = []
+    for (lat3, lon3, beds), g in t.groupby(["_lat3", "_lon3", "bedrooms"], sort=False):
+        g = g.sort_values("listedDate")
+        city = g.iloc[-1].formattedAddress.split(",")[-2].strip()
+        street = g["_street"].mode().iloc[0]
+        blocks.append({
+            "id": f"b{lat3:.3f}_{lon3:.3f}_{int(beds)}",
+            "addr": f"{street}, {city}",
+            "lat": float(lat3),
+            "lon": float(lon3),
+            "place": g.iloc[-1].place,
+            "beds": int(beds),
+            "baths": None if g.bathrooms.isna().all() else float(g.bathrooms.median()),
+            "sqft": None if g.squareFootage.isna().all() else int(g.squareFootage.median()),
+            "type": g.propertyType.mode().iloc[0],
+            "units": int(g.id.nunique()),
             "listings": [{"d": d.listedDate.strftime("%Y-%m"), "p": int(d.price)}
                          for d in g.itertuples()],
         })
-    (OUT / "properties.json").write_text(json.dumps(props, separators=(",", ":")))
+    (OUT / "blocks.json").write_text(json.dumps(blocks, separators=(",", ":")))
 
     # ---- meta ----------------------------------------------------------------
     (OUT / "meta.json").write_text(json.dumps({
@@ -164,6 +188,8 @@ def main():
                     for c, v in train[NUMERIC].median().items()},
         "trainRange": {"minMonths": float(train.months_since_2020.min()),
                        "maxMonths": float(train.months_since_2020.max())},
+        "counts": {"blocks": len(blocks), "units": int(t.id.nunique()),
+                   "listings": sum(len(b["listings"]) for b in blocks)},
         "metrics": {"mae": 297, "mape": 12.9, "coverage": 0.796,
                     "n_train": len(train), "n_test": len(test),
                     "fullModel": {"mae": 295, "mape": 12.6, "coverage": 0.812,
@@ -187,9 +213,12 @@ def main():
         for (_, r), p in zip(samp.iterrows(), pl)
     ], indent=2))
 
+    (OUT / "properties.json").unlink(missing_ok=True)   # superseded by blocks.json
     for f in sorted(OUT.iterdir()):
         print(f"   {f.name:<22}{f.stat().st_size/1e6:>7.2f} MB")
-    print(f"\n   k={k:.4f}   trend slope={trend.coef_[0]:.6f}   properties={len(props):,}")
+    print(f"\n   k={k:.4f}   trend slope={trend.coef_[0]:.6f}")
+    print(f"   blocks={len(blocks):,} covering {t.id.nunique():,} units, "
+          f"{sum(len(b['listings']) for b in blocks):,} listings")
 
 
 if __name__ == "__main__":

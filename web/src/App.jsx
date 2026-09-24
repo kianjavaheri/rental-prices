@@ -22,7 +22,7 @@ const idxToDate = (i) => new Date(Date.UTC(2020 + Math.floor(i / 12), i % 12, 1)
 export default function App() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
-  const [property, setProperty] = useState(null);
+  const [block, setBlock] = useState(null);
   const [location, setLocation] = useState(null);
   const [monthIdx, setMonthIdx] = useState(TODAY_IDX);
   const [yearFilter, setYearFilter] = useState('all');
@@ -36,7 +36,7 @@ export default function App() {
   function pick(item) {
     setLocation({ lat: item.lat, lon: item.lon, addr: item.addr });
     if (item.listings) {
-      setProperty(item);
+      setBlock(item);
       setInput({
         bedrooms: item.beds,
         bathrooms: item.baths ?? 1,
@@ -44,7 +44,7 @@ export default function App() {
         propertyType: item.type ?? 'Apartment',
       });
     } else {
-      setProperty(null);                       // hand-entered address
+      setBlock(null);                          // hand-entered address
     }
   }
 
@@ -64,8 +64,8 @@ export default function App() {
   const comps = useMemo(() => {
     if (!data || !location) return [];
     const here = toAlbers(location.lon, location.lat);
-    return data.properties
-      .filter((p) => p.beds === Number(input.bedrooms) && p.id !== property?.id)
+    return data.blocks
+      .filter((p) => p.beds === Number(input.bedrooms) && p.id !== block?.id)
       .map((p) => ({ ...p, miles: milesBetween(here, toAlbers(p.lon, p.lat)) }))
       .sort((a, b) => a.miles - b.miles)
       .slice(0, 6)
@@ -73,7 +73,7 @@ export default function App() {
         const last = p.listings.at(-1);
         return { ...p, price: last.p, date: last.d };
       });
-  }, [data, location, input.bedrooms, property]);
+  }, [data, location, input.bedrooms, block]);
 
   if (error) return <div className="loading">Could not load the model: {error}</div>;
   if (!data) return <div className="loading">Loading model…</div>;
@@ -86,9 +86,12 @@ export default function App() {
       <header>
         <div className="brand">
           <h1>Santa Cruz Rent Model</h1>
-          <span className="muted">studios &amp; 1-bedrooms · {data.properties.length.toLocaleString()} units</span>
+          <span className="muted">
+            studios &amp; 1-bedrooms · {data.meta.counts.blocks.toLocaleString()} blocks
+            {' · '}{data.meta.counts.units.toLocaleString()} units
+          </span>
         </div>
-        <SearchBox properties={data.properties} onPick={pick} />
+        <SearchBox blocks={data.blocks} onPick={pick} />
         <button className="about-btn" onClick={() => setShowAbout(true)}>
           How good is this?
         </button>
@@ -111,9 +114,9 @@ export default function App() {
       </div>
 
       <main>
-        <MapView properties={data.properties} selected={location && { ...location, id: property?.id }}
+        <MapView blocks={data.blocks} selected={location && { ...location, id: block?.id }}
                  onSelect={pick} year={yearFilter} />
-        <ResultPanel result={result} property={property} comps={comps} dateLabel={dateLabel} />
+        <ResultPanel result={result} block={block} comps={comps} dateLabel={dateLabel} />
       </main>
 
       {showAbout && <About meta={data.meta} onClose={() => setShowAbout(false)} />}

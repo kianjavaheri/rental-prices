@@ -12,14 +12,14 @@ function Recenter({ target }) {
   return null;
 }
 
-export default function MapView({ properties, selected, onSelect, year }) {
-  // A property shows on the map if it has a listing in ANY year. When a year is
-  // chosen we dim the ones that have no listing in that year rather than hiding
-  // them, so the map does not appear to lose half its pins.
-  const markers = useMemo(() => properties.map((p) => ({
+export default function MapView({ blocks, selected, onSelect, year }) {
+  // A block shows on the map if it has a listing in ANY year. When a year is
+  // chosen we dim the ones with no listing that year rather than hiding them,
+  // so the map does not appear to lose half its pins.
+  const markers = useMemo(() => blocks.map((p) => ({
     ...p,
     inYear: year === 'all' || p.listings.some((l) => l.d.startsWith(String(year))),
-  })), [properties, year]);
+  })), [blocks, year]);
 
   return (
     <MapContainer center={CENTER} zoom={10} className="map" preferCanvas>
@@ -45,7 +45,8 @@ export default function MapView({ properties, selected, onSelect, year }) {
             <Tooltip>
               <strong>{p.addr}</strong><br />
               {p.beds === 0 ? 'studio' : '1 bedroom'}
-              {p.sqft ? ` · ${p.sqft.toLocaleString()} sqft` : ''}<br />
+              {p.sqft ? ` · ~${p.sqft.toLocaleString()} sqft` : ''}
+              {p.units > 1 ? ` · ${p.units} units` : ''}<br />
               {p.listings.length} listing{p.listings.length > 1 ? 's' : ''}
               {' '}({p.listings[0].d.slice(0, 4)}
               {p.listings.length > 1 ? `–${p.listings.at(-1).d.slice(0, 4)}` : ''})

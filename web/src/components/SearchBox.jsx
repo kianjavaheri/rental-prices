@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { geocode, searchProperties } from '../lib/geocode.js';
+import { geocode, searchBlocks } from '../lib/geocode.js';
 
-export default function SearchBox({ properties, onPick }) {
+export default function SearchBox({ blocks, onPick }) {
   const [q, setQ] = useState('');
   const [items, setItems] = useState([]);
   const [open, setOpen] = useState(false);
@@ -10,7 +10,7 @@ export default function SearchBox({ properties, onPick }) {
 
   useEffect(() => {
     if (q.trim().length < 2) { setItems([]); return; }
-    const local = searchProperties(properties, q);
+    const local = searchBlocks(blocks, q);
     setItems(local);                                   // instant, from the dataset
     const ctrl = new AbortController();
     const timer = setTimeout(async () => {
@@ -21,7 +21,7 @@ export default function SearchBox({ properties, onPick }) {
       } catch { /* aborted or offline — local results stand */ }
     }, 250);                                           // debounce the network call
     return () => { clearTimeout(timer); ctrl.abort(); };
-  }, [q, properties]);
+  }, [q, blocks]);
 
   useEffect(() => {
     const away = (e) => { if (!box.current?.contains(e.target)) setOpen(false); };
@@ -61,9 +61,16 @@ export default function SearchBox({ properties, onPick }) {
               onMouseEnter={() => setActive(i)}
               onMouseDown={() => choose(it)}
             >
-              <span className="addr">{it.addr}</span>
+              <span className="addr">
+                {it.addr}
+                {!it.external && (
+                  <em className="beds">{it.beds === 0 ? 'studio' : '1br'}</em>
+                )}
+              </span>
               <span className={`tag ${it.external ? 'ext' : 'known'}`}>
-                {it.external ? 'address' : `in data · ${it.listings.length} listing${it.listings.length > 1 ? 's' : ''}`}
+                {it.external
+                  ? 'address'
+                  : `${it.listings.length} listing${it.listings.length > 1 ? 's' : ''}`}
               </span>
             </li>
           ))}
