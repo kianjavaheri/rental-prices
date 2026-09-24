@@ -1,0 +1,145 @@
+{
+  "trend": {
+    "intercept": 7.490331251339885,
+    "slope": 0.0035074205358485064
+  },
+  "k": 0.20660240275896924,
+  "epoch": "2020-01-01",
+  "medians": {
+    "bedrooms": 1.0,
+    "bathrooms": 1.0,
+    "squareFootage": 610.0,
+    "dist_coast_mi": 1.0267659544320982,
+    "dist_ucsc_mi": 27.070644652767733,
+    "dist_csumb_mi": 8.70917602736145,
+    "dist_hwy17_mi": 26.35628556153017,
+    "dist_town_center_mi": 0.9133052772423309,
+    "dist_sc_downtown_mi": 25.42699095079366,
+    "latitude": 36.677322,
+    "longitude": -121.906334,
+    "months_since_2020": 48.69,
+    "listed_month": 7.0,
+    "sqft_missing": 0.0
+  },
+  "trainRange": {
+    "minMonths": 1.58,
+    "maxMonths": 71.98
+  },
+  "metrics": {
+    "mae": 297,
+    "mape": 12.9,
+    "coverage": 0.796,
+    "n_train": 1765,
+    "n_test": 783,
+    "fullModel": {
+      "mae": 295,
+      "mape": 12.6,
+      "coverage": 0.812,
+      "note": "notebook model, 24 features"
+    }
+  },
+  "points": {
+    "universities": {
+      "UCSC": [
+        36.9916,
+        -122.0583
+      ],
+      "CSUMB": [
+        36.654,
+        -121.7985
+      ]
+    },
+    "hwy17": {
+      "Hwy 1/17 interchange": [
+        36.9905,
+        -122.0155
+      ],
+      "Pasatiempo": [
+        37.0,
+        -122.024
+      ],
+      "Granite Creek Rd": [
+        37.0415,
+        -122.0185
+      ],
+      "Mt Hermon Rd": [
+        37.051,
+        -122.015
+      ]
+    },
+    "downtowns": {
+      "Santa Cruz": [
+        36.9745,
+        -122.0265
+      ],
+      "Capitola Village": [
+        36.9722,
+        -121.953
+      ],
+      "Soquel Village": [
+        36.988,
+        -121.956
+      ],
+      "Aptos Village": [
+        36.9772,
+        -121.9025
+      ],
+      "Scotts Valley": [
+        37.051,
+        -122.013
+      ],
+      "Felton": [
+        37.0515,
+        -122.073
+      ],
+      "Ben Lomond": [
+        37.089,
+        -122.086
+      ],
+      "Boulder Creek": [
+        37.126,
+        -122.122
+      ],
+      "Watsonville": [
+        36.91,
+        -121.757
+      ],
+      "Monterey": [
+        36.6,
+        -121.894
+      ],
+      "Pacific Grove": [
+        36.62,
+        -121.919
+      ],
+      "Carmel-by-the-Sea": [
+        36.555,
+        -121.923
+      ],
+      "Seaside": [
+        36.6118,
+        -121.844
+      ],
+      "Sand City": [
+        36.617,
+        -121.848
+      ],
+      "Marina": [
+        36.684,
+        -121.802
+      ],
+      "Salinas": [
+        36.675,
+        -121.655
+      ],
+      "Carmel Valley Village": [
+        36.48,
+        -121.732
+      ]
+    },
+    "scDowntown": [
+      36.9745,
+      -122.0265
+    ]
+  }
+}
