@@ -59,6 +59,10 @@ data/quota_log.jsonl
 data/processed/*
 !data/processed/clean_filter_log.csv
 
+# Notebook backups / scratch copies
+*.BACKUP.ipynb
+*-checkpoint.ipynb
+
 # ---------------------------------------------------------------------------
 # OS / editor
 # ---------------------------------------------------------------------------
