@@ -6,3 +6,4 @@ drop missing bedrooms,11320,-193
 drop missing propertyType,11304,-16
 "drop price outside $400-$20,000",11304,-0
 drop inconsistent coords for same address,11283,-21
+null implausible squareFootage,11283,"(93 values nulled, rows kept)"

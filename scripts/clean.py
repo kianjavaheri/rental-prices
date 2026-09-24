@@ -27,6 +27,16 @@ CHURN_DAYS = 120          # same price within this window == a repost, not a re-
 PRICE_MIN, PRICE_MAX = 400, 20_000
 COORD_SPREAD_MI = 1.0     # same street address geocoded further apart than this = bad
 
+# Implausible square footage. Two real failure modes in this feed: a building's
+# total footprint stamped onto every unit (every apartment at 902 3rd St, Santa
+# Cruz reports 13,032 sqft), and the price value copied into the sqft field
+# (421 Monterey St, Salinas: 9,380 sqft at $9,380). Left in, 43 bad values out
+# of 2,144 flatten sqft's correlation with rent from +0.32 to +0.08.
+# Caps scale with bedrooms so large homes are not wrongly nulled.
+SQFT_MIN = 150
+SQFT_MAX_BY_BEDS = {0: 1200, 1: 1500, 2: 2200, 3: 3500, 4: 5000}
+SQFT_MAX_DEFAULT = 8000
+
 PROP_COLS = ["id", "formattedAddress", "addressLine1", "addressLine2", "city",
              "zipCode", "county", "latitude", "longitude", "propertyType",
              "bedrooms", "bathrooms", "squareFootage", "yearBuilt", "status"]
@@ -129,6 +139,16 @@ def main():
     before = len(df)
     df = df[~bad]
     note(f"drop inconsistent coords for same address", df, f"-{before - len(df):,}")
+
+    # Null bad sqft VALUES rather than dropping the rows -- every other field on
+    # those rows is fine. They then flow through imputation and are marked by
+    # the sqft_missing flag set just below.
+    cap = df["bedrooms"].map(SQFT_MAX_BY_BEDS).fillna(SQFT_MAX_DEFAULT)
+    bad_sqft = df["squareFootage"].notna() & (
+        (df["squareFootage"] < SQFT_MIN) | (df["squareFootage"] > cap))
+    df.loc[bad_sqft, "squareFootage"] = None
+    note("null implausible squareFootage", df,
+         f"({int(bad_sqft.sum()):,} values nulled, rows kept)")
 
     df["city"] = df["city"].replace(CITY_FIXES)
     df["sqft_missing"] = df["squareFootage"].isna()
