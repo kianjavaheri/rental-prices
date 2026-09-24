@@ -14,6 +14,9 @@ const SYNONYMS = {
   unit: '#', suite: '#', mount: 'mt', saint: 'st',
 };
 
+const UNIT_WORDS = /\b(apt|unit|ste|suite|no\.?)\b\s*[\w-]*|#\s*[\w-]*/gi;
+const PURE_NUMBER = /^\d+(?:[/-]\d+)?[a-z]?$/i;
+
 function normalise(text) {
   return text.toLowerCase()
     .replace(/[.,]/g, ' ')
@@ -23,9 +26,28 @@ function normalise(text) {
     .join(' ');
 }
 
+/**
+ * Drop the house number and unit designator, matching how blocks.json was
+ * built. Applied to the SEARCH QUERY so that typing a full address
+ * ("116 W Cliff Dr, Apt 1") still finds the "W Cliff Dr" block. Ordinal street
+ * names ("17th Ave") are numbers but not house numbers, so they survive.
+ */
+export function stripAddressDetail(addr) {
+  const [head, ...rest] = addr.split(',');
+  const tokens = head.replace(UNIT_WORDS, ' ').split(/\s+/).filter(Boolean);
+  while (tokens.length && PURE_NUMBER.test(tokens[0])) tokens.shift();
+  const street = tokens.join(' ').trim();
+  // Drop trailing "CA", "95060" and the combined "CA 95060" form
+  const STATE_ZIP = /^(?:(?:ca|california)\s*)?\d{5}(?:-\d{4})?$|^(?:ca|california)$/i;
+  const tail = rest
+    .map((x) => x.replace(UNIT_WORDS, ' ').replace(/\s+/g, ' ').trim())
+    .filter((x) => x && !STATE_ZIP.test(x));
+  return [street, ...tail].filter(Boolean).join(', ');
+}
+
 /** Match dataset street blocks on a normalised address, best matches first. */
 export function searchBlocks(blocks, query, limit = 6) {
-  const q = normalise(query);
+  const q = normalise(stripAddressDetail(query));
   if (q.length < 2) return [];
   const out = [];
   for (const p of blocks) {

@@ -64,6 +64,7 @@ function Why({ contributions }) {
 }
 
 export default function ResultPanel({ result, block, comps, dateLabel }) {
+  const unitLabel = result?.features.bedrooms === 0 ? 'studio' : '1-bedroom';
   if (!result) {
     return (
       <div className="panel empty">
@@ -94,6 +95,19 @@ export default function ResultPanel({ result, block, comps, dateLabel }) {
         <div className="range">
           {usd(result.lo)} – {usd(result.hi)}
           <span className="muted"> · 80% range, as of {dateLabel}</span>
+        </div>
+
+        {/* The trend line supplies "typical for this date"; the model supplies
+            this percentage. Time explains only ~7% of rent variation, so this
+            is the part the model is actually doing. */}
+        <div className="vs">
+          <span className={`delta ${result.vsTypicalPct >= 0 ? 'pos' : 'neg'}`}>
+            {result.vsTypicalPct >= 0 ? '+' : '−'}
+            {Math.abs(result.vsTypicalPct).toFixed(0)}%
+          </span>
+          <span className="muted">
+            vs a typical {unitLabel} in {dateLabel} ({usd(result.typical)})
+          </span>
         </div>
       </section>
 

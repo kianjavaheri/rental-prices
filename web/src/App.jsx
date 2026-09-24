@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { loadEverything } from './lib/data.js';
 import { predict } from './lib/predict.js';
 import { milesBetween, toAlbers } from './lib/geo.js';
+import { stripAddressDetail } from './lib/geocode.js';
 import MapView from './components/MapView.jsx';
 import SearchBox from './components/SearchBox.jsx';
 import ResultPanel from './components/ResultPanel.jsx';
@@ -34,7 +35,14 @@ export default function App() {
   useEffect(() => { loadEverything().then(setData).catch((e) => setError(e.message)); }, []);
 
   function pick(item) {
-    setLocation({ lat: item.lat, lon: item.lon, addr: item.addr });
+    // Suggestions show the full address, but everything downstream works at
+    // block resolution: coordinates rounded to ~100 m, house number dropped.
+    // Keeps hand-entered addresses consistent with the published data.
+    setLocation({
+      lat: Math.round(item.lat * 1000) / 1000,
+      lon: Math.round(item.lon * 1000) / 1000,
+      addr: item.listings ? item.addr : stripAddressDetail(item.addr),
+    });
     if (item.listings) {
       setBlock(item);
       setInput({

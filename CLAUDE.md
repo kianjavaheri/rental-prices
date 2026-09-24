@@ -28,6 +28,13 @@ scripts/           the pipeline, run in this order
 notebooks/
   01_modeling.ipynb  the analysis: baseline -> ridge -> LightGBM -> intervals
 web/                 React + Vite app, runs the model client-side
+  public/model/        exported bundle -- regenerate with export_web.py, never edit
+  src/lib/lgbm.js      LightGBM tree evaluator ported to JS
+  src/lib/geo.js       projection, point-in-polygon, distances (EPSG:3310)
+  src/lib/features.js  assembles the 18-feature row from lat/lon + user input
+  src/lib/predict.js   trend + trees -> dollars + conformal interval
+  scripts/             the two verification harnesses
+  vercel.json          cache headers only; build settings live in the dashboard
 ```
 
 ## Commands
@@ -78,6 +85,37 @@ exactly, and "close enough" is not the standard here.
 points are hand-coded and validated against Census polygons; a wrong coordinate
 silently corrupts a feature.
 
+**A prediction is two halves, and the UI shows both.** `predict.js` returns
+`typical` (the trend line: what a typical unit costs on that date) and
+`vsTypicalPct` (the tree residual: how far *this* unit sits from typical). Time
+explains only ~7% of rent variation, so `vsTypicalPct` is the part the model is
+actually doing. Do not collapse them into a single number in the UI.
+
+**Search takes full addresses but everything downstream is coarse.** A user may
+type `116 W Cliff Dr, Apt 1, Santa Cruz, CA 95060`. `stripAddressDetail()` in
+`geocode.js` removes the house number, unit, state and ZIP so it matches the
+`W Cliff Dr, Santa Cruz` block, and `pick()` in `App.jsx` rounds the coordinate
+to 3dp. Ordinal street names (`17th Ave`) must survive this; they are street
+names, not house numbers.
+
+## Deploying
+
+Vercel, configured in the dashboard rather than in a file:
+
+| setting | value |
+|---|---|
+| Framework Preset | Vite |
+| Root Directory | `web` |
+| Build / Output / Install Command | leave on defaults, no overrides |
+| Environment variables | **none** — the app is fully static |
+
+`web/vercel.json` only sets immutable cache headers on `/model/*`. Do not add a
+`buildCommand` there: with Root Directory set to `web`, Vercel already runs
+inside it, and a `--prefix web` command will fail looking for `web/web/`.
+
+The API keys in `.env` belong to the Python pipeline and must never be added to
+the hosting environment.
+
 ## Known data problems
 
 - Some coordinates are wrong at the source: 116 and 200 West Cliff Drive are
@@ -89,6 +127,8 @@ silently corrupts a feature.
   Census-polygon `place` from `geo.py`.
 - No listing descriptions exist, so amenities, views and renovations are
   invisible. This is the main cause of regression to the mean at the extremes.
+- Photon (the geocoder) matches loosely and will return unrelated nearby streets
+  for an address it cannot resolve. Dataset matches are ranked above it.
 
 ## Reporting results
 

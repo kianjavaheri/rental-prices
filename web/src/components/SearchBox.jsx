@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { geocode, searchBlocks } from '../lib/geocode.js';
+import { geocode, searchBlocks, stripAddressDetail } from '../lib/geocode.js';
 
 export default function SearchBox({ blocks, onPick }) {
   const [q, setQ] = useState('');
@@ -31,7 +31,7 @@ export default function SearchBox({ blocks, onPick }) {
 
   function choose(item) {
     onPick(item);
-    setQ(item.addr);
+    setQ(item.listings ? item.addr : stripAddressDetail(item.addr));
     setOpen(false);
   }
 
