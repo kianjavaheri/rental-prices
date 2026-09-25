@@ -56,6 +56,16 @@ export default function App() {
     }
   }
 
+  // Stacked layout puts the result below the map, off-screen. Picking a pin
+  // would look like nothing happened, so bring the panel up to meet it.
+  useEffect(() => {
+    if (!location) return;
+    if (!window.matchMedia('(max-width: 900px)').matches) return;
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.getElementById('result')
+      ?.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'start' });
+  }, [location]);
+
   const date = useMemo(() => idxToDate(monthIdx), [monthIdx]);
 
   const result = useMemo(() => {

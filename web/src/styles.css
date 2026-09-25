@@ -15,7 +15,7 @@ h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .05em;
 .strong { font-weight: 600; }
 .loading { padding: 80px; text-align: center; color: var(--muted); }
 
-.app { display: flex; flex-direction: column; height: 100vh; }
+.app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
 header { display: flex; align-items: center; gap: 20px; padding: 12px 20px;
   background: var(--card); border-bottom: 1px solid var(--line); }
 .brand { display: flex; flex-direction: column; min-width: 210px; }
@@ -25,13 +25,13 @@ header { display: flex; align-items: center; gap: 20px; padding: 12px 20px;
 .about-btn:hover { border-color: var(--accent); color: var(--accent); }
 
 /* search ------------------------------------------------------------------ */
-.search { position: relative; flex: 1; max-width: 560px; }
+.search { position: relative; flex: 1 1 260px; min-width: 0; max-width: 560px; }
 .search input { width: 100%; padding: 10px 14px; font-size: 15px;
   border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
 .search input:focus { outline: 2px solid var(--accent); outline-offset: -1px; background: #fff; }
 .suggestions { position: absolute; top: 46px; left: 0; right: 0; z-index: 1000;
   background: #fff; border: 1px solid var(--line); border-radius: 8px; margin: 0;
-  padding: 4px; list-style: none; box-shadow: 0 8px 28px rgba(16,24,40,.14); max-height: 320px; overflow: auto; }
+  padding: 4px; list-style: none; box-shadow: 0 8px 28px rgba(16,24,40,.14); max-height: min(320px, 50dvh); overflow: auto; }
 .suggestions li { display: flex; justify-content: space-between; align-items: center;
   gap: 12px; padding: 8px 10px; border-radius: 6px; cursor: pointer; }
 .suggestions li.active { background: #eef4ff; }
@@ -44,7 +44,7 @@ header { display: flex; align-items: center; gap: 20px; padding: 12px 20px;
 .controls { display: flex; align-items: flex-end; gap: 26px; flex-wrap: wrap;
   padding: 12px 20px; background: var(--card); border-bottom: 1px solid var(--line); }
 .controls label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
-.controls input[type="range"] { width: 280px; }
+.controls input[type="range"] { width: 280px; max-width: 100%; }
 .slider .ends { display: flex; justify-content: space-between; font-size: 10px; font-style: normal; }
 .controls select, .controls input[type="number"] {
   padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px;
@@ -53,7 +53,8 @@ header { display: flex; align-items: center; gap: 20px; padding: 12px 20px;
 .unitform input[type="number"] { width: 110px; }
 
 /* layout ------------------------------------------------------------------ */
-main { flex: 1; display: grid; grid-template-columns: 1fr 420px; min-height: 0; }
+main { flex: 1; display: grid; grid-template-columns: 1fr clamp(330px, 31vw, 420px);
+  min-height: 0; }
 .map { height: 100%; width: 100%; }
 .panel { overflow-y: auto; padding: 20px 22px 60px; background: var(--card);
   border-left: 1px solid var(--line); }
@@ -92,7 +93,7 @@ table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .modal { position: fixed; inset: 0; background: rgba(16,24,40,.45);
   display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 24px; }
 .modal-body { background: #fff; border-radius: 14px; padding: 28px 32px; max-width: 680px;
-  max-height: 86vh; overflow-y: auto; position: relative; }
+  max-height: 86vh; max-height: 86dvh; overflow-y: auto; position: relative; }
 .modal-body .close { position: absolute; top: 12px; right: 16px; border: 0; background: none;
   font-size: 26px; cursor: pointer; color: var(--muted); line-height: 1; }
 .modal-body ul { padding-left: 18px; }
@@ -100,10 +101,85 @@ table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .metrics td { padding: 6px 10px 6px 0; border-bottom: 1px solid var(--line); }
 .metrics td:first-child { color: var(--muted); white-space: nowrap; }
 
+/* responsive --------------------------------------------------------------
+   Two panes side by side need room for both. Below ~900px the app stops being
+   a fixed-height shell and becomes an ordinary scrolling page: header, map,
+   then the result panel at full length. The panel's own scrollbar is dropped
+   there -- a 300px scroll region inside a page that also scrolls is a trap. */
+
 @media (max-width: 900px) {
-  main { grid-template-columns: 1fr; grid-template-rows: 45vh 1fr; }
-  .panel { border-left: 0; border-top: 1px solid var(--line); }
-  header { flex-wrap: wrap; }
+  .app { height: auto; min-height: 100dvh; }
+  header { flex-wrap: wrap; gap: 10px 14px; padding: 10px 16px; }
+  .brand { min-width: 0; flex: 1 1 50%; }
+  .controls { padding: 10px 16px; gap: 12px 20px; }
+
+  main { display: block; }
+  .map { height: 52dvh; min-height: 300px; }
+  .panel { overflow: visible; border-left: 0; border-top: 1px solid var(--line);
+    padding: 18px 16px 48px; }
+}
+
+/* Touch phones zoom the page when a font smaller than 16px takes focus, and
+   need targets a fingertip can actually hit. */
+@media (max-width: 900px) {
+  .search input, .controls select, .controls input[type="number"] { font-size: 16px; }
+  .search input, .about-btn { min-height: 44px; }
+  .controls select, .controls input[type="number"] { min-height: 40px; }
+  .controls input[type="range"] { height: 28px; }
+  .suggestions li { padding: 11px 10px; }
+  .modal-body .close { top: 6px; right: 8px; padding: 8px 12px; }
+}
+
+/* Phone-width, upright: one control per row is the only arrangement that fits,
+   and the search needs the full width to be typed into. Excluded on short
+   viewports -- a landscape phone cannot spare the vertical room. */
+@media (max-width: 600px) and (min-height: 481px) {
+  .search { order: 3; flex: 1 1 100%; max-width: none; }
+  .controls label { gap: 3px; }
+  .controls .slider { flex: 1 1 100%; }
+  .controls input[type="range"] { width: 100%; }
+  .unitform { flex: 1 1 100%; display: grid; gap: 12px 16px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+  .unitform input[type="number"] { width: 100%; }
+  .controls select, .controls input[type="number"] { width: 100%; }
+}
+
+/* Any short viewport: trim the chrome above the fold. */
+@media (max-height: 480px) {
+  h1 { font-size: 16px; }
+  header, .controls { padding-top: 8px; padding-bottom: 8px; }
+  .brand { flex: 0 1 auto; }
+}
+
+/* Landscape phones: 350px of header and controls on a 375px-tall screen would
+   leave no map at all, so the controls stay in their wrapping row and the map
+   takes most of what is left. */
+@media (max-width: 900px) and (max-height: 480px) {
+  .map { height: 76dvh; min-height: 240px; }
+}
+
+@media (max-width: 560px) {
+  h1 { font-size: 17px; }
+  .brand .muted { font-size: 11px; }
+  .estimate { padding: 14px; }
+  .estimate .mid { font-size: 30px; }
+  .why li { grid-template-columns: minmax(84px, 108px) 1fr 44px; gap: 8px; font-size: 12px; }
+  .history td, .comps td { padding: 7px 3px; }
+  table { font-size: 12px; }
+  .comps .addr { max-width: 42vw; }
+
+  /* a full-width sheet reads better than a floating card on a phone */
+  .modal { padding: 0; align-items: flex-end; }
+  .modal-body { width: 100%; max-width: none; max-height: 90dvh;
+    padding: 24px 18px 28px; border-radius: 14px 14px 0 0; }
+  .metrics td { padding: 6px 8px 6px 0; }
+  .metrics td:first-child { white-space: normal; }
+}
+
+/* Very narrow (360px and under, or a phone with large text set) */
+@media (max-width: 380px) {
+  .unitform { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .comps .addr { max-width: 36vw; }
 }
 
 .suggestions .beds { font-size: 11px; font-style: normal; color: var(--muted);

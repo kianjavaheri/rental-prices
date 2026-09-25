@@ -67,7 +67,7 @@ export default function ResultPanel({ result, block, comps, dateLabel }) {
   const unitLabel = result?.features.bedrooms === 0 ? 'studio' : '1-bedroom';
   if (!result) {
     return (
-      <div className="panel empty">
+      <div className="panel empty" id="result">
         <h2>Pick a unit</h2>
         <p>
           Click any pin on the map, or search an address above. Blue pins are
@@ -83,7 +83,7 @@ export default function ResultPanel({ result, block, comps, dateLabel }) {
     : [];
 
   return (
-    <div className="panel">
+    <div className="panel" id="result">
       <h2>{block ? block.addr : 'Entered unit'}</h2>
       <p className="muted sub">
         {result.derived.place} · {result.derived.county} County ·
