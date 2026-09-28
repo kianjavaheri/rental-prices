@@ -110,9 +110,15 @@ export default function App() {
           </span>
         </div>
         <SearchBox blocks={data.blocks} onPick={pick} />
-        <button className="about-btn" onClick={() => setShowAbout(true)}>
-          How good is this?
-        </button>
+        <div className="actions">
+          <button className="about-btn" onClick={() => setShowAbout(true)}>
+            How good is this?
+          </button>
+          <a className="about-btn" href="https://kianjavaheri.com/"
+             target="_blank" rel="noopener noreferrer">
+            Portfolio <span aria-hidden="true">&#8599;</span>
+          </a>
+        </div>
       </header>
 
       <div className="controls">

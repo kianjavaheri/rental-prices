@@ -23,6 +23,8 @@ header { display: flex; align-items: center; gap: 20px; padding: 12px 20px;
 .about-btn { border: 1px solid var(--line); background: var(--card); color: var(--ink);
   padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 14px; white-space: nowrap; }
 .about-btn:hover { border-color: var(--accent); color: var(--accent); }
+a.about-btn { text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+.actions { display: flex; gap: 10px; margin-left: auto; }
 
 /* search ------------------------------------------------------------------ */
 .search { position: relative; flex: 1 1 260px; min-width: 0; max-width: 560px; }
@@ -49,7 +51,8 @@ header { display: flex; align-items: center; gap: 20px; padding: 12px 20px;
 .controls select, .controls input[type="number"] {
   padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px;
   background: #fff; font-size: 14px; color: var(--ink); }
-.unitform { display: flex; gap: 14px; flex-wrap: wrap; }
+.unitform { display: flex; gap: 14px; flex-wrap: wrap;
+  border-left: 1px solid var(--line); padding-left: 24px; }
 .unitform input[type="number"] { width: 110px; }
 
 /* layout ------------------------------------------------------------------ */
@@ -139,7 +142,9 @@ table { width: 100%; border-collapse: collapse; font-size: 13px; }
   .controls .slider { flex: 1 1 100%; }
   .controls input[type="range"] { width: 100%; }
   .unitform { flex: 1 1 100%; display: grid; gap: 12px 16px;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    border-left: 0; padding-left: 0;
+    border-top: 1px solid var(--line); padding-top: 12px; }
   .unitform input[type="number"] { width: 100%; }
   .controls select, .controls input[type="number"] { width: 100%; }
 }

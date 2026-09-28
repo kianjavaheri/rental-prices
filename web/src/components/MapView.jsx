@@ -1,8 +1,17 @@
 import { MapContainer, TileLayer, CircleMarker, Tooltip, useMap } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import { useEffect, useMemo } from 'react';
+import L from 'leaflet';
 
 const CENTER = [36.87, -121.90];
+
+// A fingertip covers ~44px; a 5px dot is a near-impossible target. The canvas
+// renderer hit-tests exactly (tolerance 0 by default), so on touch we both
+// enlarge the dot and let taps land near it rather than on it.
+const COARSE = window.matchMedia('(pointer: coarse)').matches;
+const RADIUS = COARSE ? 8 : 5;
+const RADIUS_SELECTED = COARSE ? 11 : 9;
+const RENDERER = L.canvas({ tolerance: COARSE ? 14 : 4 });
 
 function Recenter({ target }) {
   const map = useMap();
@@ -22,7 +31,7 @@ export default function MapView({ blocks, selected, onSelect, year }) {
   })), [blocks, year]);
 
   return (
-    <MapContainer center={CENTER} zoom={10} className="map" preferCanvas>
+    <MapContainer center={CENTER} zoom={10} className="map" preferCanvas renderer={RENDERER}>
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -33,7 +42,7 @@ export default function MapView({ blocks, selected, onSelect, year }) {
           <CircleMarker
             key={p.id}
             center={[p.lat, p.lon]}
-            radius={selected?.id === p.id ? 9 : 5}
+            radius={selected?.id === p.id ? RADIUS_SELECTED : RADIUS}
             pathOptions={{
               color: selected?.id === p.id ? '#b45309' : (p.inYear ? '#2563eb' : '#94a3b8'),
               fillColor: selected?.id === p.id ? '#f59e0b' : (p.inYear ? '#3b82f6' : '#cbd5e1'),
